@@ -10,5 +10,5 @@ so I made one...
 
 ## by the way...
 * Download [AHK](https://www.autohotkey.com/download/ahk-install.exe)
-* Donwload the [taskManager.ahk](https://github.com/fenchai23/taskManager/blob/master/TaskManager.ahk) script and Run.
-* ...or if you are lazy get the [compiled](https://github.com/fenchai23/taskManager/blob/master/TaskManager.exe) version!and just **run**.
+* Download the [taskManager.ahk](https://github.com/fenchai23/taskManager/blob/master/TaskManager.ahk) script and Run.
+* ...or if you are lazy get the [Compiled](https://github.com/fenchai23/taskManager/blob/master/TaskManager.exe) version!and just **run**.
