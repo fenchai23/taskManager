@@ -47,7 +47,7 @@ SetWindowTheme(LVP)
 gosub, Fill_LVP
 
 ; Show GUI
-; MsgBox, 4096, catching coordinates, x=%GX% y=%GY% h%GH% w=%GW%
+;~ MsgBox, 4096, catching coordinates, x=%GX% y=%GY% h%GH% w=%GW%
 GH -= 39
 GW -= 15
 Gui, Show, x%GX% y%GY% h%GH% w%GW%, % AppWindow
