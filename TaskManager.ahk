@@ -143,7 +143,7 @@ kill:
         return
     }
 
-    MsgBox, 36, , % selected_parsed
+    MsgBox, 4131, , % selected_parsed
         IfMsgBox, Yes
         {
             for k, v in selected
