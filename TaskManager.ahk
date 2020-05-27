@@ -128,14 +128,14 @@ kill:
         selected.Insert(RowNumber " ) " pname, pid)
     }
     
-    selected_parsed := "Kill " selected.count() " Items?`n"
+    selected_parsed := "Kill " selected.count() " Item" (selected.count() > 1 ? "s?" : "?")  "`n"
     
     for k, v in selected
     {
         selected_parsed .= k " : " v "`n"
     }
 
-    MsgBox, 4131, , % selected_parsed
+    MsgBox, 36, , % selected_parsed
         IfMsgBox, Yes
         {
             for k, v in selected
