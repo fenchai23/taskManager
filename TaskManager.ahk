@@ -31,10 +31,12 @@ Menu, Tray, Add, Exit, Exit
 ; Build GUI
 Gui, +AlwaysOnTop +Resize +ToolWindow
 Gui, Add, Edit, w300 Section vYouTyped
-Gui, Add, Button, ys w50 gClear default, Clear
-Gui, Add, Button, ys gFill_LVP default, Update
+Gui, Add, Button, ys w50 gClear, Clear
+Gui, Add, Button, ys gEnter_Redirector default, Update
 Gui, Add, Button, ys gKill, End Task
 Gui, Add, Button, ys gjk, Kill Them All
+Gui, Add, Edit, ys w20 Number vTypedRefreshPeriod
+Gui, Add, Text, ys yp+3, Refresh Period (s)
 Gui, font, cGreen w700
 Gui, Add, Text, Section xs vCpu, CPU Load: 00 `%
 Gui, Add, Text, ys vRam, Used RAM: 00 `%
@@ -52,7 +54,15 @@ GH -= 39
 GW -= 15
 Gui, Show, x%GX% y%GY% h%GH% w%GW%, % AppWindow
 
+; Timers and other stuffs after GUI is built
 settimer, UpdateStats, 500
+
+; read the .ini to get the refre period
+Iniread, TypedRefreshPeriod, %LogFile%, Preferences, RefreshPeriod
+; change visually Edit2 field
+GuiControl, Text, TypedRefreshPeriod, % TypedRefreshPeriod
+; set the refresh period manually
+setRefreshPeriod()
 
 return
 
@@ -66,8 +76,9 @@ Format_Columns:
     LV_ModifyCol(1, (A_GuiWidth*(150/701)))
     LV_ModifyCol(2, (A_GuiWidth*(50/701)) " integer")
     LV_ModifyCol(3, (A_GuiWidth*(70/701)) " integer")
-    LV_ModifyCol(4, (A_GuiWidth*(75/701)) " Integer SortDesc")
-    LV_ModifyCol(5, (A_GuiWidth*(315/701)))
+    LV_ModifyCol(4, (A_GuiWidth*(50/701)) " integer")
+    LV_ModifyCol(5, (A_GuiWidth*(75/701)) " Integer SortDesc")
+    LV_ModifyCol(6, (A_GuiWidth*(315/701)))
 return
 
 Clear:
@@ -76,8 +87,27 @@ Clear:
     gosub, Fill_LVP
 return
 
-Fill_LVP:
+Enter_Redirector:
+    ControlGetFocus, currFocus, % AppWindow
     
+    ; ToolTip, % currFocus
+    
+    if (currFocus = "Edit1") {
+        gosub Fill_LVP
+    } else if (currFocus == "Edit2") {
+        setRefreshPeriod()
+    } else if (currFocus == "SysListView321") {
+        gosub, CustomFilter
+    }
+    
+return
+
+CustomFilter:
+    GuiControl, Text, YouTyped, % getRowName()
+    gosub Fill_LVP
+return
+
+Fill_LVP:
     ; might get more cpu usages
     setSeDebugPrivilege()
     
@@ -118,6 +148,28 @@ Fill_LVP:
     
 return
 
+getRowName() {
+    LV_GetText(RowName, LV_GetNext())
+return RowName
+}
+
+setRefreshPeriod() {
+    global LogFile
+    
+    GuiControlGet, TypedRefreshPeriod, , TypedRefreshPeriod
+    if (TypedRefreshPeriod > 0) {
+        SetTimer, AppRefreshPeriod, % (TypedRefreshPeriod * 1000)
+    } else {
+        SetTimer, AppRefreshPeriod, Off
+    }
+    ; modify the refresh period on .ini
+    IniWrite, % TypedRefreshPeriod ? TypedRefreshPeriod : 0, %LogFile%, Preferences, RefreshPeriod
+}
+
+AppRefreshPeriod:
+    gosub, Fill_LVP
+return
+
 kill:
     RowNumber := 0 ; This causes the first loop iteration to start the search at the top of the list.
     selected := {}
@@ -131,7 +183,7 @@ kill:
         selected.Insert(RowNumber " ) " pname, pid)
     }
     
-    selected_parsed := "Kill " selected.count() " Item" (selected.count() > 1 ? "s?" : "?")  "`n"
+    selected_parsed := "Kill " selected.count() " Item" (selected.count() > 1 ? "s?" : "?") "`n"
     
     for k, v in selected
     {
@@ -142,26 +194,25 @@ kill:
         MsgBox, 4160, , Nothing to Kill -_-, 1
         return
     }
-
-    MsgBox, 4131, , % selected_parsed
-        IfMsgBox, Yes
-        {
-            for k, v in selected
-            {
-                Process, Close, % v
-            }
-            ; refresh after killing all
-            gosub, Fill_LVP
-        }
     
-    return
+    MsgBox, 4131, , % selected_parsed
+    IfMsgBox, Yes
+    {
+        for k, v in selected
+        {
+            Process, Close, % v
+        }
+        ; refresh after killing all
+        gosub, Fill_LVP
+    }
+    
+return
 
 LVP_Events:
-    If (A_GuiEvent = "DoubleClick") {
+    If (A_GuiEvent == "RightClick") {
         gosub, kill
-    ; LV_GetText(xPid, A_EventInfo, 1)
-    ; LV_GetText(xNam, A_EventInfo, 2)
-    ; MsgBox % "Pid`t" xpid "`nName`t" xNam
+} else if (A_GuiEvent == "DoubleClick") {
+gosub, CustomFilter
 }
 Return
 
@@ -183,8 +234,13 @@ return
 #If WinActive(AppWindow)
     
 Del::
-    Send, ^a{Del}
-    gosub, Fill_LVP
+    ControlGetFocus, currFocus, % AppWindow
+    
+    if (currFocus == "Edit1" || currFocus == "Edit2") {
+        Send, ^a{Del}
+    } else if (currFocus == "SysListView321") {
+        gosub, kill
+    }
 return
 
 #If
@@ -236,6 +292,8 @@ Read_Log() {
     LogY=20
     LogH=600
     LogW=500
+    [Preferences]
+    RefreshPeriod=0
     )
     
     IfNotExist, %LogFile%
@@ -255,7 +313,6 @@ Write_Log() {
     IniWrite, %GY%, %LogFile%, Position, LogY
     IniWrite, %GH%, %LogFile%, Position, LogH
     IniWrite, %GW%, %LogFile%, Position, LogW
-    
     ; MsgBox, 4096, catching coordinates, x=%GX% y=%GY% h%GH% w=%GW%
 }
 
@@ -327,20 +384,20 @@ Return ( ( SystemTime - IdleTime ) * 100 ) // SystemTime, PIT := CIT, PKT := CKT
 ; Process cpu usage as percent of total CPU
 
 ;~ https://autohotkey.com/board/topic/113942-solved-get-cpu-usage-in/
-getProcessTimes(PID)    
+getProcessTimes(PID) 
 {
     static aPIDs := [], hasSetDebug
     ; If called too frequently, will get mostly 0%, so it's better to just return the previous usage 
     if aPIDs.HasKey(PID) && A_TickCount - aPIDs[PID, "tickPrior"] < 250
         return aPIDs[PID, "usagePrior"] 
-   	; Open a handle with PROCESS_QUERY_LIMITED_INFORMATION access
+    ; Open a handle with PROCESS_QUERY_LIMITED_INFORMATION access
     if !hProc := DllCall("OpenProcess", "UInt", 0x1000, "Int", 0, "Ptr", pid, "Ptr")
         return -2, aPIDs.HasKey(PID) ? aPIDs.Remove(PID, "") : "" ; Process doesn't exist anymore or don't have access to it.
-         
+    
     DllCall("GetProcessTimes", "Ptr", hProc, "Int64*", lpCreationTime, "Int64*", lpExitTime, "Int64*", lpKernelTimeProcess, "Int64*", lpUserTimeProcess)
     DllCall("CloseHandle", "Ptr", hProc)
     DllCall("GetSystemTimes", "Int64*", lpIdleTimeSystem, "Int64*", lpKernelTimeSystem, "Int64*", lpUserTimeSystem)
-   
+    
     if aPIDs.HasKey(PID) ; check if previously run
     {
         ; find the total system run time delta between the two calls
@@ -350,20 +407,20 @@ getProcessTimes(PID)
         procKernalDelta := lpKernelTimeProcess - aPIDs[PID, "lpKernelTimeProcess"] ; lpKernelTimeProcessOld
         procUserDelta := lpUserTimeProcess - aPIDs[PID, "lpUserTimeProcess"] ;lpUserTimeProcessOld
         ; sum the kernal + user time
-        totalSystem :=  systemKernelDelta + systemUserDelta
+        totalSystem := systemKernelDelta + systemUserDelta
         totalProcess := procKernalDelta + procUserDelta
         ; The result is simply the process delta run time as a percent of system delta run time
         result := 100 * totalProcess / totalSystem
     }
     else result := -1
-
+        
     aPIDs[PID, "lpKernelTimeSystem"] := lpKernelTimeSystem
     aPIDs[PID, "lpKernelTimeSystem"] := lpKernelTimeSystem
     aPIDs[PID, "lpUserTimeSystem"] := lpUserTimeSystem
     aPIDs[PID, "lpKernelTimeProcess"] := lpKernelTimeProcess
     aPIDs[PID, "lpUserTimeProcess"] := lpUserTimeProcess
     aPIDs[PID, "tickPrior"] := A_TickCount
-    return aPIDs[PID, "usagePrior"] := result 
+return aPIDs[PID, "usagePrior"] := result 
 }
 
 setSeDebugPrivilege(enable := True)
@@ -371,18 +428,18 @@ setSeDebugPrivilege(enable := True)
     h := DllCall("OpenProcess", "UInt", 0x0400, "Int", false, "UInt", DllCall("GetCurrentProcessId"), "Ptr")
     ; Open an adjustable access token with this process (TOKEN_ADJUST_PRIVILEGES = 32)
     DllCall("Advapi32.dll\OpenProcessToken", "Ptr", h, "UInt", 32, "PtrP", t)
-    VarSetCapacity(ti, 16, 0)  ; structure of privileges
-    NumPut(1, ti, 0, "UInt")  ; one entry in the privileges array...
+    VarSetCapacity(ti, 16, 0) ; structure of privileges
+    NumPut(1, ti, 0, "UInt") ; one entry in the privileges array...
     ; Retrieves the locally unique identifier of the debug privilege:
     DllCall("Advapi32.dll\LookupPrivilegeValue", "Ptr", 0, "Str", "SeDebugPrivilege", "Int64P", luid)
     NumPut(luid, ti, 4, "Int64")
     if enable
-    	NumPut(2, ti, 12, "UInt")  ; enable this privilege: SE_PRIVILEGE_ENABLED = 2
+        NumPut(2, ti, 12, "UInt") ; enable this privilege: SE_PRIVILEGE_ENABLED = 2
     ; Update the privileges of this process with the new access token:
     r := DllCall("Advapi32.dll\AdjustTokenPrivileges", "Ptr", t, "Int", false, "Ptr", &ti, "UInt", 0, "Ptr", 0, "Ptr", 0)
-    DllCall("CloseHandle", "Ptr", t)  ; close this access token handle to save memory
-    DllCall("CloseHandle", "Ptr", h)  ; close this process handle to save memory
-    return r
+    DllCall("CloseHandle", "Ptr", t) ; close this access token handle to save memory
+    DllCall("CloseHandle", "Ptr", h) ; close this process handle to save memory
+return r
 }
 
 AutoStart:
