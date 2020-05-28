@@ -60,7 +60,7 @@ settimer, UpdateStats, 500
 ; read the .ini to get the refre period
 Iniread, TypedRefreshPeriod, %LogFile%, Preferences, RefreshPeriod
 ; change visually Edit2 field
-GuiControl, Text, TypedRefreshPeriod, % TypedRefreshPeriod
+GuiControl, Text, TypedRefreshPeriod, % TypedRefreshPeriod ? TypedRefreshPeriod : 0
 ; set the refresh period manually
 setRefreshPeriod()
 
