@@ -55,6 +55,10 @@ GW -= 15
 Gui, Show, x%GX% y%GY% h%GH% w%GW%, % AppWindow
 
 ; Timers and other stuffs after GUI is built
+
+OnMessage(0x03, "MsgMonitor")
+
+; set timer for cpu, ram updates periodically
 settimer, UpdateStats, 500
 
 ; read the .ini to get the refre period
@@ -317,7 +321,7 @@ Write_Log() {
 }
 
 GUISize:
-GuiControl, -Redraw, LVP
+; GuiControl, -Redraw, LVP
 LVwidth := A_GuiWidth - 15
 LVheight := A_GuiHeight - 80
 
@@ -325,8 +329,15 @@ GuiControl, move, LVP, w%LVwidth% h%LVheight%
 GuiControl, move, LVP, w%LVwidth% h%LVheight%
 
 gosub Format_Columns
-GuiControl, +Redraw, LVP
+Write_Log()
+; GuiControl, +Redraw, LVP
 return
+
+MsgMonitor(wParam, lParam)
+{
+    ; write log on window move
+    Write_Log()
+}
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Excerpt from htopmini v0.8.3
