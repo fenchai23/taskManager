@@ -138,7 +138,7 @@ Fill_LVP:
         } Else {
             if (process.ExecutablePath = "")
                 Continue
-            If (InStr(process.Name, YouTyped)) {
+            If (InStr(process.Name, YouTyped) || InStr(process.ExecutablePath, YouTyped)) {
                 LV_Add("Icon" A_Index, process.Name, process.processId, ProcessCreationTime(process.processId), Round(getProcessTimes(ProcessCreationTime(process.processId)), 2) " %", Round(process.WorkingSetSize / 1000000, 2), process.ExecutablePath)
                 count++
             }
