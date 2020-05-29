@@ -96,7 +96,7 @@ Enter_Redirector:
     
     ; ToolTip, % currFocus
     
-    if (currFocus = "Edit1") {
+    if (currFocus = "Edit1" || currFocus = "Button2") {
         gosub Fill_LVP
     } else if (currFocus == "Edit2") {
         setRefreshPeriod()
@@ -452,35 +452,6 @@ setSeDebugPrivilege(enable := True)
     DllCall("CloseHandle", "Ptr", h) ; close this process handle to save memory
 return r
 }
-
-AutoStart:
-    If A_IsCompiled {
-        IfNotExist, %A_Startup%\MemoryHogs.lnk
-        {
-            FileCreateShortcut, %A_ScriptFullPath%, %A_Startup%\MemoryHogs.lnk
-            Menu,Tray,Check,AutoStart
-            MsgBox,,,Added to Startup,1
-            AutoStart := 1
-            IniWrite,%AutoStart%,MemoryHogs.ini,Settings,AutoStart
-        }
-        else 
-            gosub, RemoveFromStartup
-    }
-return
-
-;remove startup item
-RemoveFromStartup:
-    If A_IsCompiled {
-        IfExist, %A_Startup%\Exercises.lnk
-        {
-            FileDelete, %A_Startup%\MemoryHogs.lnk
-            Menu,Tray,UnCheck,AutoStart
-            MsgBox,,,Removed from Startup,1
-            AutoStart := 0
-            IniWrite,%AutoStart%,MemoryHogs.ini,Settings,AutoStart
-        }
-    }
-return
 
 SetWindowTheme(handle) ; https://msdn.microsoft.com/en-us/library/bb759827(v=vs.85).aspx
 {
