@@ -182,42 +182,6 @@ setRefreshPeriod() {
 AppRefreshPeriod:
     gosub, Fill_LVP
 return
-
-kill:
-    RowNumber := 0 ; This causes the first loop iteration to start the search at the top of the list.
-    selected := {}
-    Loop
-    {
-        RowNumber := LV_GetNext(RowNumber) ; Resume the search at the row after that found by the previous iteration.
-        if not RowNumber ; The above returned zero, so there are no more selected rows.
-            break
-        LV_GetText(pid, RowNumber, 2)
-        LV_GetText(pname, RowNumber, 1)
-        selected.Insert(RowNumber " ) " pname, pid)
-    }
-    
-    selected_parsed := "Kill " selected.count() " Item" (selected.count() > 1 ? "s?" : "?") "`n"
-    
-    for k, v in selected
-    {
-        selected_parsed .= k " : " v "`n"
-    }
-    
-    if (selected.count() <= 0) {
-        MsgBox, 4160, , Nothing to Kill -_-, 1
-        return
-    }
-    
-    MsgBox, 4131, , % selected_parsed
-    IfMsgBox, Yes
-    {
-        for k, v in selected
-        {
-            Process, Close, % v
-        }
-        ; refresh after killing all
-        gosub, Fill_LVP
-    }
     
 return
 
@@ -234,14 +198,32 @@ LVP_Events:
 Return
 
 rightClickEvt() {
-    Row := A_EventInfo
-    LV_GetText(LVItem, Row, 1) ; gets the Text from Specific Row and Column
+    ;~ Row := A_EventInfo
+    ;~ LV_GetText(LVItem, Row, 1) ; gets the Text from Specific Row and Column
+    
+    RowNumber := 0 ; This causes the first loop iteration to start the search at the top of the list.
+    selected := {}
+    Loop
+    {
+        RowNumber := LV_GetNext(RowNumber) ; Resume the search at the row after that found by the previous iteration.
+        if not RowNumber ; The above returned zero, so there are no more selected rows.
+            break
+        LV_GetText(pid, RowNumber, 2)
+        LV_GetText(pname, RowNumber, 1)
+        selected.Insert(RowNumber " ) " pname, pid)
+    }
+    
+    LV_GetText(SelectedName, A_EventInfo, 1)
+    
+    LVItem := selected.count() = 1 ? SelectedName : selected.count() " Processes Selected"
+    
     Menu, LVPMenu, UseErrorlevel ; to prevent error to pop up when there is nothing to delete
     Menu, LVPMenu, DeleteAll
     Menu, LVPMenu, Add, % LVItem, CustomFilter
     Menu, LVPMenu, Add
-    Menu, LVPMenu, Add, % "End Process (es)", kill
-    Menu, LVPMenu, Add, % "Open File (s) Location", openFileLocation
+    Menu, LVPMenu, Add, % "End " (selected.count() > 1 ? selected.count() " Processes" : "Process"), kill
+    Menu, LVPMenu, Add, % "Restart " (selected.count() > 1 ? selected.count() " Processes" : "Process"), restartProcesses
+    Menu, LVPMenu, Add, % "Open " (selected.count() > 1 ? selected.count() " Directories" : "Directory"), openFileLocation
     if (x = 0 && y = 0) {
         MouseGetPos, MenuXpos, MenuYpos
         Menu, LVPMenu, Show, % (MenuXpos + 10), % (MenuYpos + 0)
@@ -297,6 +279,60 @@ openFileLocation:
         Run, % directory
     }
 return
+
+kill:
+    RowNumber := 0 ; This causes the first loop iteration to start the search at the top of the list.
+    selected := {}
+    Loop
+    {
+        RowNumber := LV_GetNext(RowNumber) ; Resume the search at the row after that found by the previous iteration.
+        if not RowNumber ; The above returned zero, so there are no more selected rows.
+            break
+        LV_GetText(pid, RowNumber, 2)
+        LV_GetText(pname, RowNumber, 1)
+        selected.Insert(RowNumber " ) " pname, pid)
+    }
+    
+    selected_parsed := "Kill " selected.count() " Item" (selected.count() > 1 ? "s?" : "?") "`n"
+    
+    for k, v in selected
+    {
+        selected_parsed .= k " : " v "`n"
+    }
+    
+    if (selected.count() <= 0) {
+        MsgBox, 4160, , Nothing to Kill -_-, 1
+        return
+    }
+    
+    MsgBox, 4131, , % selected_parsed
+    IfMsgBox, Yes
+    {
+        for k, v in selected
+        {
+            Process, Close, % v
+        }
+        ; refresh after killing all
+        gosub, Fill_LVP
+    }
+
+restartProcesses:
+    RowNumber := 0 ; This causes the first loop iteration to start the search at the top of the list.
+    selected := {}
+    Loop
+    {
+        RowNumber := LV_GetNext(RowNumber) ; Resume the search at the row after that found by the previous iteration.
+        if not RowNumber ; The above returned zero, so there are no more selected rows.
+            break
+        LV_GetText(pid, RowNumber, 2)
+        LV_GetText(fPath, RowNumber, 7)
+        selected.Insert(pid, fPath)
+    }
+    
+    for k, v in selected {
+        Process, Close, % k
+        Run, % v
+    }
 
 dummyLabel:
 return
