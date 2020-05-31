@@ -13,7 +13,7 @@ Might not beat og Task Manager but it gets the job done in other ways og Task Ma
 - Filter Processess
 - Remembers Window Size and Location
 - Custom Auto Refresh Periods
-- Show Only System Processes
+- Show System Processes
 
 **Feel free to modify and use**
 
