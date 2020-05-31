@@ -112,11 +112,6 @@ Enter_Redirector:
     
 return
 
-CustomFilter:
-    GuiControl, Text, YouTyped, % getRowName()
-    gosub Fill_LVP
-return
-
 Fill_LVP:
     
     Gui, Default
@@ -163,7 +158,7 @@ return
 
 getRowName() {
     LV_GetText(RowName, LV_GetNext())
-return RowName
+    return RowName
 }
 
 setRefreshPeriod() {
@@ -219,11 +214,18 @@ rightClickEvt() {
     
     Menu, LVPMenu, UseErrorlevel ; to prevent error to pop up when there is nothing to delete
     Menu, LVPMenu, DeleteAll
-    Menu, LVPMenu, Add, % LVItem, CustomFilter
+    Menu, LVPMenu, Add, % LVItem, dummyLabel
+        Menu, LVPMenu, Icon, % LVItem, % A_ScriptDir "\res\win.ico"
+    Menu, LVPMenu, Add
+    Menu, LVPMenu, Add, % "Search for " SelectedName, CustomFilter
+        Menu, LVPMenu, Icon, % "Search for " SelectedName, % A_ScriptDir "\res\find.ico"
     Menu, LVPMenu, Add
     Menu, LVPMenu, Add, % "End " (selected.count() > 1 ? selected.count() " Processes" : "Process"), kill
+        Menu, LVPMenu, Icon, % "End " (selected.count() > 1 ? selected.count() " Processes" : "Process"), % A_ScriptDir "\res\end.ico"
     Menu, LVPMenu, Add, % "Restart " (selected.count() > 1 ? selected.count() " Processes" : "Process"), restartProcesses
+        Menu, LVPMenu, Icon, % "Restart " (selected.count() > 1 ? selected.count() " Processes" : "Process"), % A_ScriptDir "\res\restart.ico"
     Menu, LVPMenu, Add, % "Open " (selected.count() > 1 ? selected.count() " Directories" : "Directory"), openFileLocation
+        Menu, LVPMenu, Icon, % "Open " (selected.count() > 1 ? selected.count() " Directories" : "Directory"), % A_ScriptDir "\res\dir.ico"
     if (x = 0 && y = 0) {
         MouseGetPos, MenuXpos, MenuYpos
         Menu, LVPMenu, Show, % (MenuXpos + 10), % (MenuYpos + 0)
@@ -260,6 +262,11 @@ SeeAllProcessesFilePaths(Name, filePathList) {
     LV_ModifyCol(2, "AutoHdr Integer")
     LV_ModifyCol(3, "AutoHdr Text")
 }
+
+CustomFilter:
+    GuiControl, Text, YouTyped, % getRowName()
+    gosub Fill_LVP
+return
 
 openFileLocation:
     RowNumber := 0 ; This causes the first loop iteration to start the search at the top of the list.
