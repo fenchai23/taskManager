@@ -33,7 +33,7 @@ Gui, +AlwaysOnTop +Resize +ToolWindow
 Gui, Add, Edit, w300 Section vYouTyped
 Gui, Add, Button, ys w50 gClear vClearBtn, Clear
 Gui, Add, Button, ys gEnter_Redirector vUpdateBtn default, Update
-Gui, Add, Button, ys gKill vEndTaskBtn, End Task
+Gui, Add, Button, ys gKill vEndTaskBtn, End Process (es)
 ;~ Gui, Add, Button, ys gjk, Kill Them All
 Gui, Add, Edit, ys w20 Number vTypedRefreshPeriod
 Gui, Add, Text, ys yp+3, Refresh Period (s)
@@ -224,30 +224,45 @@ return
 LVP_Events:
     ;~ ToolTip % A_GuiEvent
     If (A_GuiEvent == "RightClick") {
-        gosub, kill
+        rightClickEvt()
     } else if (A_GuiEvent == "DoubleClick") {
-        filePathList := []
-        
-        LV_GetText(Name, LV_GetNext(), 1)
-        ;~ LV_GetText(PID, LV_GetNext(), 2)
-        
-        for process in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process WHERE Name='" Name "'")
-        {
-            ;~ msgbox % process["Name"]
-            ;~ msgbox % process["CommandLine"]
-            filePathList[process["processId"]] := process["CommandLine"]
-        }
-        
-        ;~ gosub, CustomFilter
-        
-        ToggleOpenedFilesGUI(Name, filePathList)
+        doubleClickEvt()
     } else if (A_GuiEvent == "Normal" || A_GuiEvent == "K") {
         LV_GetText(fPath, LV_GetNext(), 6)
         SB_SetText(fPath)
     }
 Return
 
-ToggleOpenedFilesGUI(Name, filePathList) {
+rightClickEvt() {
+    Row := A_EventInfo
+    LV_GetText(LVItem, Row, 1) ; gets the Text from Specific Row and Column
+    Menu, LVPMenu, UseErrorlevel ; to prevent error to pop up when there is nothing to delete
+    Menu, LVPMenu, DeleteAll
+    Menu, LVPMenu, Add, % LVItem, CustomFilter
+    Menu, LVPMenu, Add
+    Menu, LVPMenu, Add, % "End Process (es)", kill
+    Menu, LVPMenu, Add, % "Open File (s) Location", openFileLocation
+    if (x = 0 && y = 0) {
+        MouseGetPos, MenuXpos, MenuYpos
+        Menu, LVPMenu, Show, % (MenuXpos + 10), % (MenuYpos + 0)
+    } else 
+        Menu, LVPMenu, Show, % x, % y
+}
+
+doubleClickEvt() {
+    filePathList := []
+    
+    LV_GetText(Name, LV_GetNext(), 1)
+    
+    for process in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process WHERE Name='" Name "'")
+    {
+        filePathList[process["processId"]] := process["CommandLine"]
+    }
+    
+    SeeAllProcessesFilePaths(Name, filePathList)
+}
+
+SeeAllProcessesFilePaths(Name, filePathList) {
     dGuiWidth := 900
     dGuiHeight := 400
     Gui, d: Destroy
@@ -263,6 +278,28 @@ ToggleOpenedFilesGUI(Name, filePathList) {
     LV_ModifyCol(2, "AutoHdr Integer")
     LV_ModifyCol(3, "AutoHdr Text")
 }
+
+openFileLocation:
+    RowNumber := 0 ; This causes the first loop iteration to start the search at the top of the list.
+    selected := {}
+    Loop
+    {
+        RowNumber := LV_GetNext(RowNumber) ; Resume the search at the row after that found by the previous iteration.
+        if not RowNumber ; The above returned zero, so there are no more selected rows.
+            break
+        LV_GetText(pid, RowNumber, 2)
+        LV_GetText(fPath, RowNumber, 7)
+        selected.Insert(pid, fPath)
+    }
+    
+    for k, v in selected {
+        SplitPath, v, , directory
+        Run, % directory
+    }
+return
+
+dummyLabel:
+return
 
 jk:
     MsgBox, 4096, % "Kill Them All?", "lol jk, are u insane?"
@@ -396,7 +433,7 @@ WM_MOUSEMOVE(wParam, lParam, Msg, Hwnd) {
     } else if (A_GuiControl = "ClearBtn") {
         TT := "You can also press DEL while typing"
     } else if (A_GuiControl = "EndTaskBtn") {
-        TT := "Can clear single or Multiple Processes"
+        TT := "Can end single or Multiple Processes`nPress DEL on item to do the same"
     } else if (A_GuiControl = "TypedRefreshPeriod") {
         TT := "type seconds and press Enter"
     }
