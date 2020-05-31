@@ -7,13 +7,17 @@ this is a project I made just for fun. I did it for those times I needed to quic
 so I made one...
 Might not beat og Task Manager but it gets the job done in other ways og Task Manager can not.
 
-![alt text](https://i.imgur.com/BeVUleq.png "taskManager")
+![alt text](https://i.imgur.com/BoZz1kM.jpg "taskManager")
 
 - Multi-Kill
 - Filter Processess
 - Remembers Window Size and Location
 - Custom Auto Refresh Periods
 - Show System Processes
+- Open Directory
+- End Processes
+- Restart Processes
+- See All Related Processes
 
 **Feel free to modify and use**
 
