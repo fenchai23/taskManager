@@ -226,11 +226,10 @@ rightClickEvt() {
         Menu, LVPMenu, Icon, % "Restart " (selected.count() > 1 ? selected.count() " Processes" : "Process"), % A_ScriptDir "\res\restart.ico"
     Menu, LVPMenu, Add, % "Open " (selected.count() > 1 ? selected.count() " Directories" : "Directory"), openFileLocation
         Menu, LVPMenu, Icon, % "Open " (selected.count() > 1 ? selected.count() " Directories" : "Directory"), % A_ScriptDir "\res\dir.ico"
-    if (x = 0 && y = 0) {
-        MouseGetPos, MenuXpos, MenuYpos
-        Menu, LVPMenu, Show, % (MenuXpos + 10), % (MenuYpos + 0)
-    } else 
-        Menu, LVPMenu, Show, % x, % y
+        
+    MouseGetPos, MenuXpos, MenuYpos
+    Menu, LVPMenu, Show, % (MenuXpos + 10), % (MenuYpos + 0)
+
 }
 
 doubleClickEvt() {
