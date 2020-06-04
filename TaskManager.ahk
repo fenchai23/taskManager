@@ -172,6 +172,9 @@ Fill_LVP:
     }
     
     GuiControl, text, Count, % count " Processes"
+    
+    LV_ModifyCol(3, " integer SortDesc") ; sorts by Creation Time after reload
+    
     ; GuiControl, +Redraw, LVP
 return
 
