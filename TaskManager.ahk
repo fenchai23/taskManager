@@ -81,12 +81,11 @@ UpdateStats:
 return
 
 Format_Columns:
-    
     LV_ModifyCol(1, (A_GuiWidth*(150/701)))
     LV_ModifyCol(2, (A_GuiWidth*(50/701)) " integer")
-    LV_ModifyCol(3, (A_GuiWidth*(70/701)) " integer")
+    LV_ModifyCol(3, (A_GuiWidth*(70/701)) " integer SortDesc")
     LV_ModifyCol(4, (A_GuiWidth*(50/701)) " integer")
-    LV_ModifyCol(5, (A_GuiWidth*(75/701)) " Integer SortDesc")
+    LV_ModifyCol(5, (A_GuiWidth*(75/701)) " Integer")
     LV_ModifyCol(6, (A_GuiWidth*(315/701)))
     LV_ModifyCol(7, (A_GuiWidth*(315/701)))
 return
@@ -152,7 +151,7 @@ Fill_LVP:
     GuiControl, text, Count, % count " Processes"
     ; GuiControl, +Redraw, LVP
     
-    LV_ModifyCol(4, " Integer SortDesc") ; make it sort by RAM usage
+    ; LV_ModifyCol(4, " Integer SortDesc") ; make it sort by RAM usage
     
 return
 
