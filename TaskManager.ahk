@@ -184,7 +184,7 @@ LVP_Events:
     If (A_GuiEvent == "RightClick") {
         rightClickEvt()
 } else if (A_GuiEvent == "DoubleClick") {
-doubleClickEvt()
+gosub, kill
 } else if (A_GuiEvent == "Normal" || A_GuiEvent == "K") {
 LV_GetText(fPath, LV_GetNext(), 6)
 SB_SetText(fPath)
@@ -218,6 +218,8 @@ rightClickEvt() {
     Menu, LVPMenu, Add
     Menu, LVPMenu, Add, % "Search for " SelectedName, CustomFilter
     Menu, LVPMenu, Icon, % "Search for " SelectedName, % A_ScriptDir "\res\find.ico"
+    Menu, LVPMenu, Add, % "Show All " SelectedName, showAllRelatedProcesses
+    Menu, LVPMenu, Icon, % "Show All " SelectedName, % A_ScriptDir "\res\all.ico"
     Menu, LVPMenu, Add
     Menu, LVPMenu, Add, % "End " (selected.count() > 1 ? selected.count() " Processes" : "Process"), kill
     Menu, LVPMenu, Icon, % "End " (selected.count() > 1 ? selected.count() " Processes" : "Process"), % A_ScriptDir "\res\end.ico"
@@ -231,7 +233,7 @@ rightClickEvt() {
     
 }
 
-doubleClickEvt() {
+showAllRelatedProcesses:
     filePathList := []
     
     LV_GetText(Name, LV_GetNext(), 1)
@@ -242,7 +244,7 @@ doubleClickEvt() {
     }
     
     SeeAllProcessesFilePaths(Name, filePathList)
-}
+return
 
 SeeAllProcessesFilePaths(Name, filePathList) {
     dGuiWidth := 900
@@ -320,7 +322,8 @@ kill:
         ; refresh after killing all
         gosub, Fill_LVP
     }
-    
+return
+
 restartProcesses:
     RowNumber := 0 ; This causes the first loop iteration to start the search at the top of the list.
     selected := {}
@@ -338,7 +341,8 @@ restartProcesses:
         Process, Close, % k
         Run, % v
     }
-    
+return
+
 dummyLabel:
 return
 
