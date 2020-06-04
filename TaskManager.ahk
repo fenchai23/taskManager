@@ -119,7 +119,7 @@ Fill_LVP:
     ; might get more cpu usages
     setSeDebugPrivilege()
     
-    GuiControl, -Redraw, LVP
+    ; GuiControl, -Redraw, LVP
     
     Gui, Submit, NoHide
     
@@ -150,7 +150,7 @@ Fill_LVP:
     }
     
     GuiControl, text, Count, % count " Processes"
-    GuiControl, +Redraw, LVP
+    ; GuiControl, +Redraw, LVP
     
     LV_ModifyCol(4, " Integer SortDesc") ; make it sort by RAM usage
     
@@ -158,7 +158,7 @@ return
 
 getRowName() {
     LV_GetText(RowName, LV_GetNext())
-    return RowName
+return RowName
 }
 
 setRefreshPeriod() {
@@ -177,19 +177,19 @@ setRefreshPeriod() {
 AppRefreshPeriod:
     gosub, Fill_LVP
 return
-    
+
 return
 
 LVP_Events:
     ;~ ToolTip % A_GuiEvent
     If (A_GuiEvent == "RightClick") {
         rightClickEvt()
-    } else if (A_GuiEvent == "DoubleClick") {
-        doubleClickEvt()
-    } else if (A_GuiEvent == "Normal" || A_GuiEvent == "K") {
-        LV_GetText(fPath, LV_GetNext(), 6)
-        SB_SetText(fPath)
-    }
+} else if (A_GuiEvent == "DoubleClick") {
+doubleClickEvt()
+} else if (A_GuiEvent == "Normal" || A_GuiEvent == "K") {
+LV_GetText(fPath, LV_GetNext(), 6)
+SB_SetText(fPath)
+}
 Return
 
 rightClickEvt() {
@@ -215,21 +215,21 @@ rightClickEvt() {
     Menu, LVPMenu, UseErrorlevel ; to prevent error to pop up when there is nothing to delete
     Menu, LVPMenu, DeleteAll
     Menu, LVPMenu, Add, % LVItem, dummyLabel
-        Menu, LVPMenu, Icon, % LVItem, % A_ScriptDir "\res\win.ico"
+    Menu, LVPMenu, Icon, % LVItem, % A_ScriptDir "\res\win.ico"
     Menu, LVPMenu, Add
     Menu, LVPMenu, Add, % "Search for " SelectedName, CustomFilter
-        Menu, LVPMenu, Icon, % "Search for " SelectedName, % A_ScriptDir "\res\find.ico"
+    Menu, LVPMenu, Icon, % "Search for " SelectedName, % A_ScriptDir "\res\find.ico"
     Menu, LVPMenu, Add
     Menu, LVPMenu, Add, % "End " (selected.count() > 1 ? selected.count() " Processes" : "Process"), kill
-        Menu, LVPMenu, Icon, % "End " (selected.count() > 1 ? selected.count() " Processes" : "Process"), % A_ScriptDir "\res\end.ico"
+    Menu, LVPMenu, Icon, % "End " (selected.count() > 1 ? selected.count() " Processes" : "Process"), % A_ScriptDir "\res\end.ico"
     Menu, LVPMenu, Add, % "Restart " (selected.count() > 1 ? selected.count() " Processes" : "Process"), restartProcesses
-        Menu, LVPMenu, Icon, % "Restart " (selected.count() > 1 ? selected.count() " Processes" : "Process"), % A_ScriptDir "\res\restart.ico"
+    Menu, LVPMenu, Icon, % "Restart " (selected.count() > 1 ? selected.count() " Processes" : "Process"), % A_ScriptDir "\res\restart.ico"
     Menu, LVPMenu, Add, % "Open " (selected.count() > 1 ? selected.count() " Directories" : "Directory"), openFileLocation
-        Menu, LVPMenu, Icon, % "Open " (selected.count() > 1 ? selected.count() " Directories" : "Directory"), % A_ScriptDir "\res\dir.ico"
-        
+    Menu, LVPMenu, Icon, % "Open " (selected.count() > 1 ? selected.count() " Directories" : "Directory"), % A_ScriptDir "\res\dir.ico"
+    
     MouseGetPos, MenuXpos, MenuYpos
     Menu, LVPMenu, Show, % (MenuXpos + 10), % (MenuYpos + 0)
-
+    
 }
 
 doubleClickEvt() {
@@ -321,7 +321,7 @@ kill:
         ; refresh after killing all
         gosub, Fill_LVP
     }
-
+    
 restartProcesses:
     RowNumber := 0 ; This causes the first loop iteration to start the search at the top of the list.
     selected := {}
@@ -339,7 +339,7 @@ restartProcesses:
         Process, Close, % k
         Run, % v
     }
-
+    
 dummyLabel:
 return
 
@@ -349,9 +349,9 @@ return
 
 GuiClose:
 GuiEscape:
-    Write_Log()
-    FFTooltip() ; remove FFTooltips
-    Gui, hide
+Write_Log()
+FFTooltip() ; remove FFTooltips
+Gui, hide
 return
 
 Show:
@@ -363,7 +363,7 @@ return
 F5::
     gosub, Fill_LVP
 return
-    
+
 Del::
     ControlGetFocus, currFocus, % AppWindow
     
@@ -448,16 +448,16 @@ Write_Log() {
 }
 
 GUISize:
-    ; GuiControl, -Redraw, LVP
-    LVwidth := A_GuiWidth - 15
-    LVheight := A_GuiHeight - 80
+; GuiControl, -Redraw, LVP
+LVwidth := A_GuiWidth - 15
+LVheight := A_GuiHeight - 80
 
-    GuiControl, move, LVP, w%LVwidth% h%LVheight%
-    GuiControl, move, LVP, w%LVwidth% h%LVheight%
+GuiControl, move, LVP, w%LVwidth% h%LVheight%
+GuiControl, move, LVP, w%LVwidth% h%LVheight%
 
-    gosub Format_Columns
-    Write_Log()
-    ; GuiControl, +Redraw, LVP
+gosub Format_Columns
+Write_Log()
+; GuiControl, +Redraw, LVP
 return
 
 WN_MOVE(wParam, lParam) {
@@ -467,39 +467,39 @@ WN_MOVE(wParam, lParam) {
 
 WM_MOUSEMOVE(wParam, lParam, Msg, Hwnd) {
     TT := ""
-   ; LVM_HITTEST   -> docs.microsoft.com/en-us/windows/desktop/Controls/lvm-hittest
-   ; LVHITTESTINFO -> docs.microsoft.com/en-us/windows/desktop/api/Commctrl/ns-commctrl-taglvhittestinfo
-   
+    ; LVM_HITTEST -> docs.microsoft.com/en-us/windows/desktop/Controls/lvm-hittest
+    ; LVHITTESTINFO -> docs.microsoft.com/en-us/windows/desktop/api/Commctrl/ns-commctrl-taglvhittestinfo
+    
     if (A_GuiControl = "UpdateBtn") {
         TT := "F5 to refresh"
-    } else if (A_GuiControl = "ClearBtn") {
-        TT := "You can also press DEL while typing"
-    } else if (A_GuiControl = "EndTaskBtn") {
-        TT := "Can end single or Multiple Processes`nPress DEL on item to do the same"
-    } else if (A_GuiControl = "TypedRefreshPeriod") {
-        TT := "type seconds and press Enter"
-    }
-   
-   ;~ If A_GuiControl In Btn1,Btn2,Btn3
-      ;~ GuiControlGet, TT, , %A_GuiControl%
-   ;~ Else If (A_GuiControl = "LVP") {
-      ;~ VarSetCapacity(LVHTI, 24, 0) ; LVHITTESTINFO
-      ;~ , NumPut(lParam & 0xFFFF, LVHTI, 0, "Int")
-      ;~ , NumPut((lParam >> 16) & 0xFFFF, LVHTI, 4, "Int")
-      ;~ , Item := DllCall("SendMessage", "Ptr", Hwnd, "UInt", 0x1012, "Ptr", 0, "Ptr", &LVHTI, "Int") ; LVM_HITTEST
-      ;~ If (Item >= 0) && (NumGet(LVHTI, 8, "UInt") & 0x0E) { ; LVHT_ONITEM
-        ;~ Gui, ListView, %A_GuiControl%
-        ;~ LV_GetText(pName, Item + 1, 1)
-        ;~ LV_GetText(fPath, Item + 1, 6)
-        ;~ pName .= ": "
-      ;~ }
-   ;~ } else {
-        ;~ FFTooltip()
-    ;~ }
-   
-   ;~ TT := pName fPath
-   
-   FFTooltip(TT)
+} else if (A_GuiControl = "ClearBtn") {
+TT := "You can also press DEL while typing"
+} else if (A_GuiControl = "EndTaskBtn") {
+TT := "Can end single or Multiple Processes`nPress DEL on item to do the same"
+} else if (A_GuiControl = "TypedRefreshPeriod") {
+TT := "type seconds and press Enter"
+}
+
+;~ If A_GuiControl In Btn1,Btn2,Btn3
+;~ GuiControlGet, TT, , %A_GuiControl%
+;~ Else If (A_GuiControl = "LVP") {
+;~ VarSetCapacity(LVHTI, 24, 0) ; LVHITTESTINFO
+;~ , NumPut(lParam & 0xFFFF, LVHTI, 0, "Int")
+;~ , NumPut((lParam >> 16) & 0xFFFF, LVHTI, 4, "Int")
+;~ , Item := DllCall("SendMessage", "Ptr", Hwnd, "UInt", 0x1012, "Ptr", 0, "Ptr", &LVHTI, "Int") ; LVM_HITTEST
+;~ If (Item >= 0) && (NumGet(LVHTI, 8, "UInt") & 0x0E) { ; LVHT_ONITEM
+;~ Gui, ListView, %A_GuiControl%
+;~ LV_GetText(pName, Item + 1, 1)
+;~ LV_GetText(fPath, Item + 1, 6)
+;~ pName .= ": "
+;~ }
+;~ } else {
+;~ FFTooltip()
+;~ }
+
+;~ TT := pName fPath
+
+FFTooltip(TT)
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -630,24 +630,24 @@ return false
 
 ; ===============================================================================================================================
 ; FFToolTip(Text:="", X:="", Y:="", WhichToolTip:=1)
-; Function:       Creates a tooltip window anywhere on the screen. Unlike the built-in ToolTip command, calling this function
-;                 repeatedly will not cause the tooltip window to flicker. Otherwise, it behaves the same way. Use this function
-;                 without the first three parameters, i.e. FFToolTip(), in order to hide the tooltip.
-; Parameters:     Text - The text to display in the tooltip. To create a multi-line tooltip, use the linefeed character (`n) in
-;                    between each line, e.g. Line1`nLine2. If blank or omitted, the existing tooltip will be hidden.
-;                 X - The x position of the tooltip. This position is relative to the active window, the active window's client
-;                    area, or the entire screen depending on the coordinate mode (see the CoordMode command). In the default
-;                    mode, the coordinates that are relative to the active window.
-;                 Y - The y position of the tooltip. See the above X parameter for more information. If both the X and Y
-;                    coordinates are omitted, the tooltip will be shown near the mouse cursor.
-;                 WhichToolTip - A number between 1 and 20 to indicate which tooltip window to operate upon. If unspecified, the
-;                    default is 1.
-; Return values:  None
-; Global vars:    None
-; Dependencies:   None
-; Tested with:    AHK 1.1.30.01 (A32/U32/U64)
-; Tested on:      Win 7 (x64)
-; Written by:     iPhilip
+; Function: Creates a tooltip window anywhere on the screen. Unlike the built-in ToolTip command, calling this function
+; repeatedly will not cause the tooltip window to flicker. Otherwise, it behaves the same way. Use this function
+; without the first three parameters, i.e. FFToolTip(), in order to hide the tooltip.
+; Parameters: Text - The text to display in the tooltip. To create a multi-line tooltip, use the linefeed character (`n) in
+; between each line, e.g. Line1`nLine2. If blank or omitted, the existing tooltip will be hidden.
+; X - The x position of the tooltip. This position is relative to the active window, the active window's client
+; area, or the entire screen depending on the coordinate mode (see the CoordMode command). In the default
+; mode, the coordinates that are relative to the active window.
+; Y - The y position of the tooltip. See the above X parameter for more information. If both the X and Y
+; coordinates are omitted, the tooltip will be shown near the mouse cursor.
+; WhichToolTip - A number between 1 and 20 to indicate which tooltip window to operate upon. If unspecified, the
+; default is 1.
+; Return values: None
+; Global vars: None
+; Dependencies: None
+; Tested with: AHK 1.1.30.01 (A32/U32/U64)
+; Tested on: Win 7 (x64)
+; Written by: iPhilip
 ; ===============================================================================================================================
 ; MSDN Links:
 ; https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-getcursorpos - GetCursorPos function
@@ -656,59 +656,59 @@ return false
 ; ===============================================================================================================================
 
 FFToolTip(Text:="", X:="", Y:="", WhichToolTip:=1) {
-   static ID := [], Xo, Yo, W, H, SavedText
-        , PID := DllCall("GetCurrentProcessId")
-        , _ := VarSetCapacity(Point, 8)
-   
-   if (Text = "") {  ; Hide the tooltip
-      ToolTip, , , , WhichToolTip
-      ID.Delete(WhichToolTip)
-   } else if not ID[WhichToolTip] {  ; First call
-      ToolTip, %Text%, X, Y, WhichToolTip
-      ID[WhichToolTip] := WinExist("ahk_class tooltips_class32 ahk_pid " PID)
-      WinGetPos, , , W, H, % "ahk_id " ID[WhichToolTip]
-      SavedText := Text
-   } else if (Text != SavedText) {  ; The tooltip text changed
-      ToolTip, %Text%, X, Y, WhichToolTip
-      WinGetPos, , , W, H, % "ahk_id " ID[WhichToolTip]
-      SavedText := Text
-   } else {  ; The tooltip is being repositioned
-      if (Flag := X = "" || Y = "") {
-         DllCall("GetCursorPos", "Ptr", &Point, "Int")
-         MouseX := NumGet(Point, 0, "Int")
-         MouseY := NumGet(Point, 4, "Int")
-      }
-      ;
-      ; Convert input coordinates to screen coordinates
-      ;
-      if (A_CoordModeToolTip = "Window") {
-         WinGetPos, WinX, WinY, , , A
-         X := X = "" ? MouseX + 16 : X + WinX
-         Y := Y = "" ? MouseY + 16 : Y + WinY
-      } else if (A_CoordModeToolTip = "Client") {
-         NumPut(X, Point, 0, "Int"), NumPut(Y, Point, 4, "Int")
-         DllCall("ClientToScreen", "Ptr", WinExist("A"), "Ptr", &Point, "Int")
-         X := X = "" ? MouseX + 16 : NumGet(Point, 0, "Int")
-         Y := Y = "" ? MouseY + 16 : NumGet(Point, 4, "Int")
-      } else {  ; A_CoordModeToolTip = "Screen"
-         X := X = "" ? MouseX + 16 : X
-         Y := Y = "" ? MouseY + 16 : Y
-      }
-      ;
-      ; Deal with the bottom and right edges of the screen
-      ;
-      if Flag {
-         X := X + W >= A_ScreenWidth  ? A_ScreenWidth  - W - 1 : X
-         Y := Y + H >= A_ScreenHeight ? A_ScreenHeight - H - 1 : Y
-         if (MouseX >= X && MouseX <= X + W && MouseY >= Y && MouseY <= Y + H)
-            X := MouseX - W - 3, Y := MouseY - H - 3
-      }
-      ;
-      ; If necessary, store the coordinates and move the tooltip window
-      ;
-      if (X != Xo || Y != Yo) {
-         Xo := X, Yo := Y
-         DllCall("MoveWindow", "Ptr", ID[WhichToolTip], "Int", X, "Int", Y, "Int", W, "Int", H, "Int", false, "Int")
-      }
-   }
+    static ID := [], Xo, Yo, W, H, SavedText
+    , PID := DllCall("GetCurrentProcessId")
+    , _ := VarSetCapacity(Point, 8)
+    
+    if (Text = "") { ; Hide the tooltip
+        ToolTip, , , , WhichToolTip
+        ID.Delete(WhichToolTip)
+    } else if not ID[WhichToolTip] { ; First call
+        ToolTip, %Text%, X, Y, WhichToolTip
+        ID[WhichToolTip] := WinExist("ahk_class tooltips_class32 ahk_pid " PID)
+        WinGetPos, , , W, H, % "ahk_id " ID[WhichToolTip]
+        SavedText := Text
+    } else if (Text != SavedText) { ; The tooltip text changed
+        ToolTip, %Text%, X, Y, WhichToolTip
+        WinGetPos, , , W, H, % "ahk_id " ID[WhichToolTip]
+        SavedText := Text
+    } else { ; The tooltip is being repositioned
+        if (Flag := X = "" || Y = "") {
+            DllCall("GetCursorPos", "Ptr", &Point, "Int")
+            MouseX := NumGet(Point, 0, "Int")
+            MouseY := NumGet(Point, 4, "Int")
+        }
+        ;
+        ; Convert input coordinates to screen coordinates
+        ;
+        if (A_CoordModeToolTip = "Window") {
+            WinGetPos, WinX, WinY, , , A
+            X := X = "" ? MouseX + 16 : X + WinX
+            Y := Y = "" ? MouseY + 16 : Y + WinY
+        } else if (A_CoordModeToolTip = "Client") {
+            NumPut(X, Point, 0, "Int"), NumPut(Y, Point, 4, "Int")
+            DllCall("ClientToScreen", "Ptr", WinExist("A"), "Ptr", &Point, "Int")
+            X := X = "" ? MouseX + 16 : NumGet(Point, 0, "Int")
+            Y := Y = "" ? MouseY + 16 : NumGet(Point, 4, "Int")
+        } else { ; A_CoordModeToolTip = "Screen"
+            X := X = "" ? MouseX + 16 : X
+            Y := Y = "" ? MouseY + 16 : Y
+        }
+        ;
+        ; Deal with the bottom and right edges of the screen
+        ;
+        if Flag {
+            X := X + W >= A_ScreenWidth ? A_ScreenWidth - W - 1 : X
+            Y := Y + H >= A_ScreenHeight ? A_ScreenHeight - H - 1 : Y
+            if (MouseX >= X && MouseX <= X + W && MouseY >= Y && MouseY <= Y + H)
+                X := MouseX - W - 3, Y := MouseY - H - 3
+        }
+        ;
+        ; If necessary, store the coordinates and move the tooltip window
+        ;
+        if (X != Xo || Y != Yo) {
+            Xo := X, Yo := Y
+            DllCall("MoveWindow", "Ptr", ID[WhichToolTip], "Int", X, "Int", Y, "Int", W, "Int", H, "Int", false, "Int")
+        }
+    }
 }
