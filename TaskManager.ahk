@@ -38,6 +38,8 @@ Menu, Tray, Add, % AppWindow, Show
 Menu, Tray, Icon, % AppWindow, imageres.dll, 23
 Menu, Tray, Default, % AppWindow
 Menu, Tray, Add
+Menu, Tray, Add, Reset Position, ResetPosition
+Menu, Tray, Add
 Menu, Tray, Add, Edit, Edit
 Menu, Tray, Add, Reload, Reload
 Menu, Tray, Add, Exit, Exit
@@ -228,7 +230,7 @@ LVP_Events:
 } else if (A_GuiEvent == "DoubleClick") {
 gosub, kill
 } else if (A_GuiEvent == "Normal" || A_GuiEvent == "K") {
-LV_GetText(fPath, LV_GetNext(), 6)
+LV_GetText(fPath, LV_GetNext(), IsProcessElevated ? 6 : 5)
 SB_SetText(fPath)
 }
 Return
@@ -466,6 +468,13 @@ Write_Log() {
     IniWrite, %GW%, %LogFile%, Position, LogW
     ; MsgBox, 4096, catching coordinates, x=%GX% y=%GY% h%GH% w=%GW%
 }
+
+ResetPosition:
+    IniWrite, 20, %LogFile%, Position, LogX
+    IniWrite, 20, %LogFile%, Position, LogY
+
+    reload
+    return
 
 GUISize:
 ; GuiControl, -Redraw, LVP
