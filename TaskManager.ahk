@@ -45,7 +45,7 @@ Menu, Tray, Add, Reload, Reload
 Menu, Tray, Add, Exit, Exit
 
 ; Build GUI
-Gui, +AlwaysOnTop +Resize +ToolWindow
+Gui, +AlwaysOnTop +Resize
 Gui, Add, Edit, w300 Section vYouTyped
 Gui, Add, Button, ys w50 gClear vClearBtn, Clear
 Gui, Add, Button, ys gEnter_Redirector vUpdateBtn default, Update
@@ -72,9 +72,6 @@ GW -= 15
 Gui, Show, x%GX% y%GY% h%GH% w%GW%, % AppWindow
 
 ; Timers and other stuffs after GUI is built
-
-; tracks window move
-OnMessage(0x03, "WN_MOVE")
 
 ; tracks mouse move
 OnMessage(0x0200, "WM_MOUSEMOVE")
@@ -321,7 +318,7 @@ openFileLocation:
         if not RowNumber ; The above returned zero, so there are no more selected rows.
             break
         LV_GetText(pid, RowNumber, 2)
-        LV_GetText(fPath, RowNumber, 7)
+        LV_GetText(fPath, RowNumber, (IsProcessElevated) ? 6 : 5)
         selected.Insert(pid, fPath)
     }
     
@@ -377,14 +374,27 @@ restartProcesses:
         if not RowNumber ; The above returned zero, so there are no more selected rows.
             break
         LV_GetText(pid, RowNumber, 2)
-        LV_GetText(fPath, RowNumber, 7)
+        LV_GetText(fPath, RowNumber, IsProcessElevated ? 6 : 5)
         selected.Insert(pid, fPath)
     }
+
+    selected_parsed := "Restart " selected.count() " Item" (selected.count() > 1 ? "s?" : "?") "`n"
     
-    for k, v in selected {
-        Process, Close, % k
-        Run, % v
+    for k, v in selected
+    {
+        selected_parsed .= k " : " v "`n"
     }
+    
+    MsgBox, 4131, , % selected_parsed
+    IfMsgBox, Yes
+    {
+        for k, v in selected 
+        {
+            Process, Close, % k
+            Run, % v
+        }
+    }
+    
 return
 
 dummyLabel:
@@ -395,11 +405,14 @@ jk:
 return
 
 GuiClose:
+    Write_Log()
+    ExitApp
+    return
 GuiEscape:
-Write_Log()
-FFTooltip() ; remove FFTooltips
-Gui, hide
-return
+    Write_Log()
+    FFTooltip() ; remove FFTooltips
+    Gui, Minimize
+    return
 
 Show:
     Gui, show
@@ -460,7 +473,7 @@ Read_Log() {
 
 Write_Log() {
     global
-    
+
     WinGetPos, GX, GY, GW, GH, %AppWindow%
     IniWrite, %GX%, %LogFile%, Position, LogX
     IniWrite, %GY%, %LogFile%, Position, LogY
@@ -476,23 +489,20 @@ ResetPosition:
     reload
     return
 
-GUISize:
-; GuiControl, -Redraw, LVP
-LVwidth := A_GuiWidth - 15
-LVheight := A_GuiHeight - 80
+GUISize:    
+    ; do not save if minimized
+    if (A_EventInfo == 1)
+        return
+    ; GuiControl, -Redraw, LVP
+    LVwidth := A_GuiWidth - 15
+    LVheight := A_GuiHeight - 80
 
-GuiControl, move, LVP, w%LVwidth% h%LVheight%
-GuiControl, move, LVP, w%LVwidth% h%LVheight%
+    GuiControl, move, LVP, w%LVwidth% h%LVheight%
+    GuiControl, move, LVP, w%LVwidth% h%LVheight%
 
-gosub Format_Columns
-Write_Log()
-; GuiControl, +Redraw, LVP
-return
-
-WN_MOVE(wParam, lParam) {
-    ; write log on window move
-    Write_Log()
-}
+    gosub Format_Columns
+    ; GuiControl, +Redraw, LVP
+    return
 
 WM_MOUSEMOVE(wParam, lParam, Msg, Hwnd) {
     TT := ""
@@ -501,15 +511,15 @@ WM_MOUSEMOVE(wParam, lParam, Msg, Hwnd) {
     
     if (A_GuiControl = "UpdateBtn") {
         TT := "F5 to refresh"
-} else if (A_GuiControl = "ClearBtn") {
-TT := "You can also press DEL while typing"
-} else if (A_GuiControl = "EndTaskBtn") {
-TT := "Can end single or Multiple Processes`nPress DEL on item to do the same"
-} else if (A_GuiControl = "TypedRefreshPeriod") {
-TT := "type seconds and press Enter"
-}
+    } else if (A_GuiControl = "ClearBtn") {
+        TT := "You can also press DEL while typing"
+    } else if (A_GuiControl = "EndTaskBtn") {
+        TT := "Can end single or Multiple Processes`nPress DEL on item to do the same"
+    } else if (A_GuiControl = "TypedRefreshPeriod") {
+        TT := "type seconds and press Enter"
+    }
 
-FFTooltip(TT)
+    FFTooltip(TT)
 }
 
 ; INCLUDES
