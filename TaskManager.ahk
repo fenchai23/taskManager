@@ -406,7 +406,7 @@ return
 
 GuiClose:
     Write_Log()
-    ExitApp
+    Gui, Hide
     return
 GuiEscape:
     Write_Log()
@@ -485,6 +485,8 @@ Write_Log() {
 ResetPosition:
     IniWrite, 20, %LogFile%, Position, LogX
     IniWrite, 20, %LogFile%, Position, LogY
+    IniWrite, 800, %LogFile%, Position, LogH
+    IniWrite, 500, %LogFile%, Position, LogW
 
     reload
     return
