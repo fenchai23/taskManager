@@ -45,7 +45,7 @@ Menu, Tray, Add, Reload, Reload
 Menu, Tray, Add, Exit, Exit
 
 ; Build GUI
-Gui, +AlwaysOnTop +Resize
+Gui, +Resize
 Gui, Add, Edit, w300 Section vYouTyped
 Gui, Add, Button, ys w50 gClear vClearBtn, Clear
 Gui, Add, Button, ys gEnter_Redirector vUpdateBtn default, Update
@@ -225,10 +225,10 @@ LVP_Events:
     If (A_GuiEvent == "RightClick") {
         rightClickEvt()
 } else if (A_GuiEvent == "DoubleClick") {
-gosub, kill
+    gosub, kill
 } else if (A_GuiEvent == "Normal" || A_GuiEvent == "K") {
-LV_GetText(fPath, LV_GetNext(), IsProcessElevated ? 6 : 5)
-SB_SetText(fPath)
+    LV_GetText(fPath, LV_GetNext(), IsProcessElevated ? 6 : 5)
+    SB_SetText(fPath)
 }
 Return
 
@@ -318,7 +318,7 @@ openFileLocation:
         if not RowNumber ; The above returned zero, so there are no more selected rows.
             break
         LV_GetText(pid, RowNumber, 2)
-        LV_GetText(fPath, RowNumber, (IsProcessElevated) ? 6 : 5)
+        LV_GetText(fPath, RowNumber, (IsProcessElevated) ? 7 : 6)
         selected.Insert(pid, fPath)
     }
     
@@ -374,7 +374,7 @@ restartProcesses:
         if not RowNumber ; The above returned zero, so there are no more selected rows.
             break
         LV_GetText(pid, RowNumber, 2)
-        LV_GetText(fPath, RowNumber, IsProcessElevated ? 6 : 5)
+        LV_GetText(fPath, RowNumber, IsProcessElevated ? 7 : 6)
         selected.Insert(pid, fPath)
     }
 
