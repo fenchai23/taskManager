@@ -9,7 +9,9 @@ SetWorkingDir %A_ScriptDir%
 
 ; https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-process
 
-AppWindow := "Task Manager with Filter | come on Microsoft, if I could do it..."
+AppVersion := "2.0.0"
+
+AppWindow := "Task Manager with Filter | v" AppVersion
 
 LogFile := A_ScriptDir "\TaskManager.ini"
 
@@ -46,13 +48,15 @@ Menu, Tray, Add, Exit, Exit
 
 ; Build GUI
 Gui, +Resize
-Gui, Add, Edit, w300 Section vYouTyped
+Gui, Add, Edit, w300 Section vYouTyped hwndYouTyped
+    SetEditCueBanner(YouTyped, "Search by Name|Process|Path...")
 Gui, Add, Button, ys w50 gClear vClearBtn, Clear
 Gui, Add, Button, ys gEnter_Redirector vUpdateBtn default, Update
 Gui, Add, Button, ys gKill vEndTaskBtn, End Process (es)
 ;~ Gui, Add, Button, ys gjk, Kill Them All
-Gui, Add, Edit, ys w20 Number vTypedRefreshPeriod
-Gui, Add, Text, ys yp+3, Refresh Period (s)
+Gui, Add, Edit, ys w40 yp+1 Number center vTypedRefreshPeriod hwndTypedRefreshPeriod
+    SetEditCueBanner(TypedRefreshPeriod, "0 Sec")
+Gui, Add, Button, ys w50 vPinApp gPinApp, Pin
 Gui, font, cGreen w700
 Gui, Add, Text, Section xs vCpu, CPU Load: 00 `%
 Gui, Add, Text, ys vRam, Used RAM: 00 `%
@@ -132,6 +136,17 @@ Enter_Redirector:
     }
     
 return
+
+PinApp:
+    t := WinExist(AppTitle)
+    WinGet, ExStyle, ExStyle, ahk_id %t%
+    if (ExStyle & 0x8) {
+        WinSet, AlwaysOnTop, Off, ahk_id %t%
+    } else {
+        WinSet, AlwaysOnTop, On, ahk_id %t%
+    }
+    GuiControl,, PinApp, % (ExStyle & 0x8) ? "Pin" : "UnPin"
+    return
 
 Fill_LVP:
     
@@ -291,7 +306,7 @@ SeeAllProcessesFilePaths(Name, filePathList) {
     dGuiWidth := 900
     dGuiHeight := 400
     Gui, d: Destroy
-    Gui, d: +AlwaysOnTop +Resize +ToolWindow
+    Gui, d: +Resize +ToolWindow
     Gui, d: add, ListView, % "AltSubmit hwndLVD " "w" (dGuiWidth - 20) " h" (dGuiHeight - 20), % "Index|PID|" Name
     SetWindowTheme(LVD)
     Gui, d: show, w%dGuiWidth% h%dGuiHeight%, % AppTitle
@@ -530,3 +545,4 @@ WM_MOUSEMOVE(wParam, lParam, Msg, Hwnd) {
 #Include, ProcessLib.ahk
 #Include, FFToolTip.ahk
 #Include, SetWindowTheme.ahk
+#Include, SetEditCueBanner.ahk
